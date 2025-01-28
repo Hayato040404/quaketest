@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>地震情報通知アプリ</title>
+</head>
+<body>
+  <h1>地震情報通知アプリ</h1>
+  <button id="subscribeButton">通知を許可</button>
+  <script>
+    const publicVapidKey = 'YOUR_PUBLIC_VAPID_KEY';
+
+    // Register service worker and subscribe to push notifications
+    async function subscribe() {
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.register('/service-worker.js');
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+        });
+
+        await fetch('/subscribe', {
+          method: 'POST',
+          body: JSON.stringify(subscription),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        alert('通知が許可されました！');
+      } else {
+        alert('このブラウザはプッシュ通知をサポートしていません。');
+      }
+    }
+
+    document.getElementById('subscribeButton').addEventListener('click', () => {
+      subscribe().catch(err => console.error(err));
+    });
+
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
+  </script>
+</body>
+</html>
