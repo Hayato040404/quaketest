@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>地震情報通知アプリ</title>
+  <title>EWCアプリ</title>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="/ewc.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/ewc.png">
@@ -109,9 +109,9 @@
         const earthquakeInfo = document.createElement('div');
         earthquakeInfo.innerHTML = `
           <p>${formattedMessage.replace(/\n/g, '<br>')}</p>
-          <textarea id="comment${index}" placeholder="自作文を作成"></textarea>
-          <button onclick="shareComment(${index})">自作情報を共有</button>
-          <textarea id="editedMessage${index}" placeholder="通知メッセージを編集" style="width: 100%;">${formattedMessage}</textarea>
+          <textarea id="comment${index}" placeholder="自作地震情報文"></textarea>
+          <button onclick="shareComment(${index})">自作情報分を共有</button>
+          <textarea id="editedMessage${index}" placeholder="通知メッセージを編集" style="width: 100%; height: 150px;">${formattedMessage}</textarea>
           <button onclick="shareEditedMessage(${index})">編集したメッセージを共有</button>
         `;
         container.appendChild(earthquakeInfo);
