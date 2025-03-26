@@ -114,7 +114,7 @@ function formatEarthquakeInfo(earthquake, message) {
   }
 
   // 通常の地震情報のフォーマット
-  let formattedMessage = `\n${date} ${timeStr}頃\n震源地：${hypocenter}\n最大震度：${maxScale}\n深さ：${depth}\n規模：M${magnitude}\n${tsunamiInfo}\n\n［各地の震度］`;
+  let formattedMessage = `[地震情報]\n${date} ${timeStr}頃\n震源地：${hypocenter}\n最大震度：${maxScale}\n深さ：${depth}\n規模：M${magnitude}\n${tsunamiInfo}\n\n［各地の震度］`;
 
   // 震度順序を定義
   const scaleOrder = ['7', '6強', '6弱', '5強', '5弱', '4', '3', '2', '1'];
