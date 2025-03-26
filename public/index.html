@@ -166,13 +166,13 @@
 
     function shareComment(index) {
       const comment = document.getElementById(`comment${index}`).value;
-      const url = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(comment)}`;
+      const url = `https://social-plugins.line.me/lineit/share?text=${comment}`;
       window.open(url, '_blank');
     }
 
     function shareEditedMessage(index) {
       const editedMessage = document.getElementById(`editedMessage${index}`).value;
-      const url = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(editedMessage)}`;
+      const url = `https://social-plugins.line.me/lineit/share?text=${editedMessage}`;
       window.open(url, '_blank');
     }
 
