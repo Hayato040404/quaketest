@@ -3,17 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>【EWC】地震情報通知アプリ</title>
-  
-    
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  
-
+  <title>地震情報通知アプリ</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/ewc.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/ewc.png">
 </head>
 <body>
-  <h1>【EWC】地震情報通知アプリ</h1>
-  ↓通知を許可するダイアログが出たあとは押さないでください
-  <p></p>
+  <h1>地震情報通知アプリ</h1>
   <button id="subscribeButton">通知を許可</button>
   <div id="earthquakeInfo"></div>
   <script>
@@ -113,10 +109,10 @@
         const earthquakeInfo = document.createElement('div');
         earthquakeInfo.innerHTML = `
           <p>${formattedMessage.replace(/\n/g, '<br>')}</p>
-          <textarea id="comment${index}" placeholder="自分好みのテンプレへ！"></textarea>
-          <button onclick="shareComment(${index})">自作メッセージを共有</button>
+          <textarea id="comment${index}" placeholder="自作文を作成"></textarea>
+          <button onclick="shareComment(${index})">自作情報を共有</button>
           <textarea id="editedMessage${index}" placeholder="通知メッセージを編集" style="width: 100%;">${formattedMessage}</textarea>
-          <button onclick="shareEditedMessage(${index})">編集したメッセージをLINEで共有</button>
+          <button onclick="shareEditedMessage(${index})">編集したメッセージを共有</button>
         `;
         container.appendChild(earthquakeInfo);
       });
@@ -167,14 +163,26 @@
 
     function shareComment(index) {
       const comment = document.getElementById(`comment${index}`).value;
-      const url = `https://social-plugins.line.me/lineit/share?text=${comment}`;
-      window.open(url, '_blank');
+      if (navigator.share) {
+        navigator.share({
+          title: 'コメント',
+          text: comment
+        }).catch(console.error);
+      } else {
+        alert('このブラウザは共有機能をサポートしていません。');
+      }
     }
 
     function shareEditedMessage(index) {
       const editedMessage = document.getElementById(`editedMessage${index}`).value;
-      const url = `https://social-plugins.line.me/lineit/share?text=${editedMessage}`;
-      window.open(url, '_blank');
+      if (navigator.share) {
+        navigator.share({
+          title: '地震情報',
+          text: editedMessage
+        }).catch(console.error);
+      } else {
+        alert('このブラウザは共有機能をサポートしていません。');
+      }
     }
 
     // Fetch earthquake info on page load
