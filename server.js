@@ -3,9 +3,11 @@ const http = require('http');
 const WebSocket = require('ws');
 const bodyParser = require('body-parser');
 const webPush = require('web-push');
+const axios = require('axios');
 
 // WebSocket サーバーのエンドポイント
 const wsUrl = 'wss://api.p2pquake.net/v2/ws';
+const eewWsUrl = 'wss://ws-api.wolfx.jp/jma_eew';
 
 // WebSocket 再接続の間隔（ミリ秒）
 const reconnectInterval = 5000;
@@ -80,6 +82,53 @@ function connectWebSocket() {
     console.log('WebSocket connection closed. Reconnecting in 5 seconds...');
     setTimeout(connectWebSocket, reconnectInterval);
   });
+}
+
+// Connect to emergency earthquake alert WebSocket
+let eewWs;
+function connectEewWebSocket() {
+  console.log('Connecting to EEW WebSocket server...');
+  eewWs = new WebSocket(eewWsUrl);
+
+  eewWs.on('open', () => {
+    console.log('EEW WebSocket connection established');
+  });
+
+  eewWs.on('message', async (data) => {
+    try {
+      const message = JSON.parse(data);
+      console.log("Received EEW Data:", message);
+
+      if (message.Title && message.CodeType) {
+        let formattedMessage;
+        if (message.isCancel) {
+          formattedMessage = "先程の緊急地震速報は取り消されました。";
+        } else {
+          formattedMessage = formatEewMessage(message);
+          if (message.isAssumption) {
+            formattedMessage += "\n※この緊急地震速報は精度が低い可能性があります※";
+          }
+        }
+        sendWebPushNotification(formattedMessage);
+      }
+    } catch (error) {
+      console.error("Error processing EEW message data:", error);
+    }
+  });
+
+  eewWs.on('error', (error) => {
+    console.error('EEW WebSocket error:', error);
+  });
+
+  eewWs.on('close', () => {
+    console.log('EEW WebSocket connection closed. Reconnecting in 5 seconds...');
+    setTimeout(connectEewWebSocket, reconnectInterval);
+  });
+}
+
+function formatEewMessage(data) {
+  return `【${data.Title} 推定最大震度${data.MaxIntensity}】\n(第${data.Serial}報)\n
+${data.OriginTime.split(' ')[1]}頃、${data.Hypocenter}を震源とする地震がありました。地震の規模はM${data.Magunitude}程度、震源の深さは約${data.Depth}km、最大震度${data.MaxIntensity}程度と推定されています。`;
 }
 
 function formatEarthquakeInfo(earthquake, message) {
@@ -232,6 +281,7 @@ function sendWebPushNotification(message) {
 }
 
 connectWebSocket();
+connectEewWebSocket();
 
 // Web Push notification subscription endpoint
 app.post('/subscribe', (req, res) => {
