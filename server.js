@@ -66,6 +66,7 @@ function connectWebSocket() {
         console.log('Processing tsunami warning data with code 552.');
         const tsunamiInfo = formatTsunamiWarningInfo(message);
         sendWebPushNotification(tsunamiInfo);
+        sendLineBroadcast(tsunamiInfo);  // 津波情報をLINEで配信
       } else {
         console.log(`Ignored message with code: ${message.code}`);
       }
@@ -227,49 +228,6 @@ function formatTsunamiWarningInfo(message) {
   return formattedMessage;
 }
 
-function groupPointsByScale(points) {
-  const pointsByScale = {};
-  points.forEach(point => {
-    const scale = getScaleDescription(point.scale);
-    const addr = point.addr;
-    const prefecture = point.pref;
-
-    if (!scale) return;
-
-    pointsByScale[scale] = pointsByScale[scale] || {};
-    pointsByScale[scale][prefecture] = pointsByScale[scale][prefecture] || [];
-    pointsByScale[scale][prefecture].push(addr);
-  });
-  return pointsByScale;
-}
-
-function getScaleDescription(scale) {
-  const scaleDescriptions = {
-    10: '1',
-    20: '2',
-    30: '3',
-    40: '4',
-    45: '5弱',
-    50: '5強',
-    55: '6弱',
-    60: '6強',
-    70: '7'
-  };
-  return scaleDescriptions[scale] || '不明';
-}
-
-function getTsunamiInfo(domesticTsunami) {
-  const tsunamiMessages = {
-    "None": "この地震による津波の心配はありません。",
-    "Unknown": "不明",
-    "Checking": "津波の有無を調査中です。今後の情報に注意してください。",
-    "NonEffective": "若干の海面変動があるかもしれませんが、被害の心配はありません。",
-    "Watch": "現在、津波注意報を発表中です。",
-    "Warning": "津波警報等（大津波警報・津波警報あるいは津波注意報）を発表中です。"
-  };
-  return tsunamiMessages[domesticTsunami] || "（津波情報なし）";
-}
-
 function sendWebPushNotification(message) {
   const payload = JSON.stringify({ title: '地震情報', body: message });
 
@@ -278,6 +236,30 @@ function sendWebPushNotification(message) {
       console.error('Error sending notification, reason: ', error);
     });
   });
+}
+
+async function sendLineBroadcast(message) {
+  const token = 'phHkJycfaMjHVXDcir9/eIdPV8uVhEsaqcosdBo53JxJtr2D2n+yrvUbe8aSiKGFXmwHEH1O0w+B5MwHGxq28G6R6kTkqrWPA/siv6vLWC/mxGBKYXIvB76n41aoa3fqOou9/vShToLAKaUG+tQFVAdB04t89/1O/w1cDnyilFU=';
+  const url = 'https://api.line.me/v2/bot/message/broadcast';
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  };
+  const body = {
+    messages: [
+      {
+        type: 'text',
+        text: message
+      }
+    ]
+  };
+
+  try {
+    const response = await axios.post(url, body, { headers });
+    console.log('Message sent to LINE Broadcast:', response.data);
+  } catch (error) {
+    console.error('Error sending message to LINE Broadcast:', error);
+  }
 }
 
 connectWebSocket();
