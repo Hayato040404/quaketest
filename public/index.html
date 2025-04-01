@@ -11,6 +11,7 @@
 <body>
   <h1>地震情報通知アプリ</h1>
   <button id="subscribeButton">通知を許可</button>
+  <button id="testNotificationButton">お試し通知</button>
   <div id="earthquakeInfo"></div>
   <div id="eewInfo"></div>
   <script>
@@ -41,6 +42,12 @@
 
     document.getElementById('subscribeButton').addEventListener('click', () => {
       subscribe().catch(err => console.error(err));
+    });
+
+    document.getElementById('testNotificationButton').addEventListener('click', () => {
+      fetch('/test-notification', {
+        method: 'POST'
+      }).catch(err => console.error(err));
     });
 
     function urlBase64ToUint8Array(base64String) {
