@@ -287,5 +287,12 @@ app.post('/subscribe', (req, res) => {
   res.status(201).json({});
 });
 
+// Test notification endpoint
+app.post('/test-notification', (req, res) => {
+  const testMessage = 'これはお試し通知のメッセージです。';
+  sendWebPushNotification(testMessage);
+  res.status(201).json({});
+});
+
 // Serve static files (for PWA)
 app.use(express.static('public'));
