@@ -197,6 +197,21 @@ function formatEarthquakeInfo(earthquake, message) {
   return formattedMessage;
 }
 
+function getScaleDescription(scale) {
+  const scaleDescriptions = {
+    10: '1',
+    20: '2',
+    30: '3',
+    40: '4',
+    45: '5弱',
+    50: '5強',
+    55: '6弱',
+    60: '6強',
+    70: '7'
+  };
+  return scaleDescriptions[scale] || '不明';
+}
+
 function formatTsunamiWarningInfo(message) {
   if (message.cancelled) {
     return "津波警報等（大津波警報・津波警報あるいは津波注意報）は解除されました。";
