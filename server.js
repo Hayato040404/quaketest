@@ -129,7 +129,7 @@ function connectEewWebSocket() {
 
 function formatEewMessage(data) {
   return `【${data.Title} 推定最大震度${data.MaxIntensity}】\n(第${data.Serial}報)\n
-${data.OriginTime.split(' ')[1]}頃、${data.Hypocenter}を震源とする地震がありました。地震の規模はM${data.Magunitude}程度、震源の深さは約${data.Depth}km、最大震度${data.MaxIntensity}程度と推定されています。`;
+  ${data.OriginTime.split(' ')[1]}頃、${data.Hypocenter}を震源とする地震がありました。地震の規模はM${data.Magunitude}程度、震源の深さは約${data.Depth}km、最大震度${data.MaxIntensity}程度と推定されています。`;
 }
 
 function formatEarthquakeInfo(earthquake, message) {
@@ -197,6 +197,22 @@ function formatEarthquakeInfo(earthquake, message) {
   return formattedMessage;
 }
 
+function groupPointsByScale(points) {
+  const pointsByScale = {};
+  points.forEach(point => {
+    const scale = getScaleDescription(point.scale);
+    const addr = point.addr;
+    const prefecture = point.pref;
+
+    if (!scale) return;
+
+    pointsByScale[scale] = pointsByScale[scale] || {};
+    pointsByScale[scale][prefecture] = pointsByScale[scale][prefecture] || [];
+    pointsByScale[scale][prefecture].push(addr);
+  });
+  return pointsByScale;
+}
+
 function getScaleDescription(scale) {
   const scaleDescriptions = {
     10: '1',
@@ -212,6 +228,18 @@ function getScaleDescription(scale) {
   return scaleDescriptions[scale] || '不明';
 }
 
+function getTsunamiInfo(domesticTsunami) {
+  const tsunamiMessages = {
+    "None": "この地震による津波の心配はありません。",
+    "Unknown": "不明",
+    "Checking": "津波の有無を調査中です。今後の情報に注意してください。",
+    "NonEffective": "若干の海面変動があるかもしれませんが、被害の心配はありません。",
+    "Watch": "現在、津波注意報を発表中です。",
+    "Warning": "津波警報等（大津波警報・津波警報あるいは津波注意報）を発表中です。"
+  };
+  return tsunamiMessages[domesticTsunami] || "（津波情報なし）";
+}
+
 function formatTsunamiWarningInfo(message) {
   if (message.cancelled) {
     return "津波警報等（大津波警報・津波警報あるいは津波注意報）は解除されました。";
@@ -222,7 +250,7 @@ function formatTsunamiWarningInfo(message) {
     MajorWarning: '【大津波警報🟪】\n大津波警報を発表しました！\n今すぐ高台やビルに避難！！\n【対象地域】',
     Warning: '【津波警報🟥】\n津波警報を発表しています！\n高台や近くのビルへ避難！\n【対象地域】',
     Watch: '【津波注意報🟨】\n津波注意報を発表しています。\n海や川から離れて下さい！\n【対象地域】',
-    Unknown: '【津波情報❓️】\n津波の状況は不明です。\n今後の情報に注意してください。\n※プログラムエラーの可能性大。開発者をメンションしてください。',
+    Unknown: '【津波情報❓️】\n津波の状況は不明です。\n今後の情報に注意してください。\n※プログラムエラーの可能性大。開発者をメンションして下さい。'
   };
 
   let formattedMessage = warnings[message.areas[0].grade] || '【津波情報】\n津波の状況が不明です。\n【対象地域】';
