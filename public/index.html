@@ -71,7 +71,7 @@
 <body>
     <header>
         <h1>地震情報アプリ</h1>
-        <p>通知関連のプログラムがおそらく治りました.（4/7時点）ぜひ下のボタンから通知を許可してみてください！</p>
+        <p>通知関連のプログラムがおそらく治りました。（4/7時点）ぜひ下のボタンから通知を許可してみてください！</p>
         <button id="subscribeButton">通知を許可</button>
         <button id="testNotificationButton">テスト通知</button>
         <button class="scroll-button" onclick="scrollToEewSection()">緊急地震速報へ</button>
@@ -186,7 +186,7 @@
                 let formattedMessage;
 
                 if (earthquake.issue && earthquake.issue.type === 'ScalePrompt') {
-                    formattedMessage = `[震度速報]\n${date} ${timeStr}ころ、地震による強い揺れを感じました。震度３以上が観測された地域をお知らせします。\n`;
+                    formattedMessage = `[震度速報]\n${date} ${timeStr}ごろ、地震による強い揺れを感じました。震度３以上が観測された地域をお知らせします。\n`;
 
                     Object.keys(pointsByScale).sort((a, b) => b - a).forEach(scale => {
                         formattedMessage += `\n《震度${scale}》`;
@@ -197,7 +197,7 @@
                 } else {
                     formattedMessage = `[地震情報]\n${date} ${timeStr}頃\n震源地：${hypocenter}\n最大震度：${maxScale}\n深さ：${depth}\n規模：M${magnitude}\n${tsunamiInfo}\n\n［各地の震度］`;
 
-                    const scaleOrder = ['7', '6強', '6弱', '5強', '5弱', '4', '3', '2', '1'];
+                    const scaleOrder = ['7', '6強', '6弱', '5強', '5弱','5弱以上と推定されるが震度情報を入手していない', '4', '3', '2', '1'];
                     const sortedScales = Object.keys(pointsByScale).sort((a, b) => {
                         return scaleOrder.indexOf(a) - scaleOrder.indexOf(b);
                     });
@@ -224,8 +224,7 @@
                 const earthquakeInfo = document.createElement('div');
                 earthquakeInfo.innerHTML = `
                     <p>${formattedMessage.replace(/\n/g, '<br>')}</p>
-                    <textarea id="comment${index}" placeholder="自作地震情報文"></textarea>
-                    <button onclick="shareComment(${index})">自作情報文を共有</button>
+                    
                     <textarea id="editedMessage${index}" placeholder="通知メッセージを編集" style="width: 100%; height: 150px;">${formattedMessage}</textarea>
                     <button onclick="shareEditedMessage(${index})">編集したメッセージを共有</button>
                 `;
@@ -250,8 +249,8 @@
                 const eewInfo = document.createElement('div');
                 eewInfo.innerHTML = `
                     <p>${formattedMessage.replace(/\n/g, '<br>')}</p>
-                    <textarea id="eewComment" placeholder="自作緊急地震速報文"></textarea>
-                    <button onclick="shareEewComment()">自作情報文を共有</button>
+                    //<textarea id="eewComment" placeholder="自作緊急地震速報文"></textarea>
+                    //<button onclick="shareEewComment()">自作情報文を共有</button>
                     <textarea id="editedEewMessage" placeholder="通知メッセージを編集" style="width: 100%; height: 150px;">${formattedMessage}</textarea>
                     <button onclick="shareEditedEewMessage()">編集したメッセージを共有</button>
                 `;
@@ -270,6 +269,7 @@
                 30: '3',
                 40: '4',
                 45: '5弱',
+                46: '5弱以上と推定されるが震度情報を入手していない',
                 50: '5強',
                 55: '6弱',
                 60: '6強',
