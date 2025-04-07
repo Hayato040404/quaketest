@@ -71,6 +71,7 @@
 <body>
     <header>
         <h1>地震情報アプリ</h1>
+        <p>通知関連のプログラムがおそらく治りました.（4/7時点）ぜひ下のボタンから通知を許可してみてください！</p>
         <button id="subscribeButton">通知を許可</button>
         <button id="testNotificationButton">テスト通知</button>
         <button class="scroll-button" onclick="scrollToEewSection()">緊急地震速報へ</button>
@@ -259,8 +260,7 @@
         }
 
         function formatEewMessage(data) {
-            return `【${data.Title} 推定最大震度${data.MaxIntensity}】\n(第${data.Serial}報)\n
-            ${data.OriginTime.split(' ')[1]}頃、${data.Hypocenter}を震源とする地震がありました。地震の規模はM${data.Magunitude}程度、震源の深さは約${data.Depth}km、最大震度${data.MaxIntensity}程度と推定されています。`;
+            return `【${data.Title} 推定最大震度${data.MaxIntensity}】\n(第${data.Serial}報)\n${data.OriginTime.split(' ')[1]}頃、${data.Hypocenter}を震源とする地震がありました。地震の規模はM${data.Magunitude}程度、震源の深さは約${data.Depth}km、最大震度${data.MaxIntensity}程度と推定されています。`;
         }
 
         function getScaleDescription(scale) {
