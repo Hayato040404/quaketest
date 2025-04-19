@@ -164,63 +164,59 @@
         }
 
         function displayEarthquakeInfo(earthquakes) {
-            const container = document.getElementById('earthquakeInfo');
-            container.innerHTML = '';
-            earthquakes.forEach((earthquake, index) => {
-                const time = new Date(earthquake.earthquake.time);
-                const date = time.toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' });
-                const timeStr = time.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+    const container = document.getElementById('earthquakeInfo');
+    container.innerHTML = '';
+    earthquakes.forEach((earthquake, index) => {
+        const time = new Date(earthquake.earthquake.time);
+        const date = time.toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' });
+        const timeStr = time.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
 
-                const hypocenter = earthquake.earthquake.hypocenter.name;
-                const maxScale = getScaleDescription(earthquake.earthquake.maxScale);
-                let magnitude = earthquake.earthquake.hypocenter.magnitude;
-                let depth = earthquake.earthquake.hypocenter.depth;
+        const hypocenter = earthquake.earthquake.hypocenter.name;
+        const maxScale = getScaleDescription(earthquake.earthquake.maxScale);
+        let magnitude = earthquake.earthquake.hypocenter.magnitude;
+        let depth = earthquake.earthquake.hypocenter.depth;
 
-                depth = depth === -1 ? '不明' : depth === 0 ? 'ごく浅い' : `約${depth}km`;
-                magnitude = magnitude === -1 ? '不明' : magnitude.toFixed(1);
+        depth = depth === -1 ? '不明' : depth === 0 ? 'ごく浅い' : `約${depth}km`;
+        magnitude = magnitude === -1 ? '不明' : magnitude.toFixed(1);
 
-                const pointsByScale = groupPointsByScale(earthquake.points);
-                const tsunamiInfo = getTsunamiInfo(earthquake.earthquake.domesticTsunami);
-                const freeFormComment = earthquake.comments?.freeFormComment || '';
+        const pointsByScale = groupPointsByScale(earthquake.points);
+        const tsunamiInfo = getTsunamiInfo(earthquake.earthquake.domesticTsunami);
+        const freeFormComment = earthquake.comments?.freeFormComment || '';
 
-                let formattedMessage;
+        let formattedMessage;
 
-                if (earthquake.issue && earthquake.issue.type === 'ScalePrompt') {
-                    formattedMessage = `[震度速報]\n${date} ${timeStr}ごろ、地震による強い揺れを感じました。震度３以上が観測された地域をお知らせします。\n`;
+        if (earthquake.issue && earthquake.issue.type === 'ScalePrompt') {
+            formattedMessage = `[震度速報]\n${date} ${timeStr}ごろ、地震による強い揺れを感じました。震度３以上が観測された地域をお知らせします。\n`;
 
-                    Object.keys(pointsByScale).sort((a, b) => b - a).forEach(scale => {
-                        formattedMessage += `\n《震度${scale}》`;
-                        Object.keys(pointsByScale[scale]).forEach(pref => {
-                            formattedMessage += `\n【${pref}】${pointsByScale[scale][pref].join('  ')}`;
-                        });
+            Object.keys(pointsByScale).sort((a, b) => b - a).forEach(scale => {
+                formattedMessage += `\n《震度${scale}》`;
+                Object.keys(pointsByScale[scale]).forEach(pref => {
+                    formattedMessage += `\n【${pref}】${pointsByScale[scale][pref].join('  ')}`;
+                });
+            });
+        } else {
+            formattedMessage = `[地震情報]\n${date} ${timeStr}頃\n震源地：${hypocenter}\n最大震度：${maxScale}\n深さ：${depth}\n規模：M${magnitude}\n${tsunamiInfo}\n\n［各地の震度］`;
+
+            const scaleOrder = ['7', '6強', '6弱', '5強', '5弱','5弱以上と推定されるが震度情報を入手していない', '4', '3', '2', '1'];
+            const sortedScales = Object.keys(pointsByScale).sort((a, b) => {
+                return scaleOrder.indexOf(a) - scaleOrder.indexOf(b);
+            });
+
+            sortedScales.forEach(scale => {
+                formattedMessage += `\n《震度${scale}》`;
+                Object.keys(pointsByScale[scale]).forEach(pref => {
+                    const uniqueCities = new Set();
+                    pointsByScale[scale][pref].forEach(addr => {
+                        uniqueCities.add(addr); // 修正後の市区町村名を利用
                     });
-                } else {
-                    formattedMessage = `[地震情報]\n${date} ${timeStr}頃\n震源地：${hypocenter}\n最大震度：${maxScale}\n深さ：${depth}\n規模：M${magnitude}\n${tsunamiInfo}\n\n［各地の震度］`;
+                    formattedMessage += `\n【${pref}】${Array.from(uniqueCities).join('  ')}`;
+                });
+            });
 
-                    const scaleOrder = ['7', '6強', '6弱', '5強', '5弱','5弱以上と推定されるが震度情報を入手していない', '4', '3', '2', '1'];
-                    const sortedScales = Object.keys(pointsByScale).sort((a, b) => {
-                        return scaleOrder.indexOf(a) - scaleOrder.indexOf(b);
-                    });
-
-                    sortedScales.forEach(scale => {
-                        formattedMessage += `\n《震度${scale}》`;
-                        Object.keys(pointsByScale[scale]).forEach(pref => {
-                            const uniqueCities = new Set();
-                            pointsByScale[scale][pref].forEach(addr => {
-                                const cityMatch = addr.match(/([^市区町村]+[市区町村])/);
-                                if (cityMatch) {
-                                    uniqueCities.add(cityMatch[1]);
-                                }
-                            });
-                            formattedMessage += `\n【${pref}】${Array.from(uniqueCities).join('  ')}`;
-                        });
-                    });
-
-                    if (freeFormComment) {
-                        formattedMessage += `\n\n【情報】\n${freeFormComment}`;
-                    }
-                }
-
+            if (freeFormComment) {
+                formattedMessage += `\n\n【情報】\n${freeFormComment}`;
+            }
+        }
                 const earthquakeInfo = document.createElement('div');
                 earthquakeInfo.innerHTML = `
                     <p>${formattedMessage.replace(/\n/g, '<br>')}</p>
@@ -278,22 +274,48 @@
             return scaleDescriptions[scale] || '不明';
         }
 
-        function groupPointsByScale(points) {
-            const pointsByScale = {};
-            points.forEach(point => {
-                const scale = getScaleDescription(point.scale);
-                const addr = point.addr;
-                const prefecture = point.pref;
+function groupPointsByScale(points) {
+    const pointsByScale = {};
 
-                if (!scale) return;
+    points.forEach(point => {
+        const scale = getScaleDescription(point.scale);
+        let addr = point.addr;
+        const prefecture = point.pref;
 
-                pointsByScale[scale] = pointsByScale[scale] || {};
-                pointsByScale[scale][prefecture] = pointsByScale[scale][prefecture] || [];
-                pointsByScale[scale][prefecture].push(addr);
-            });
-            return pointsByScale;
+        if (!scale) return;
+
+        // STEP 1: 市区町村で切り出す
+        let originalAddr = addr; // 元のアドレス
+        const cityMatch = addr.match(/([^市区町村]+[市区町村])/);
+        if (cityMatch) {
+            addr = cityMatch[1];
+        }
+        console.log(`切り出し前: ${originalAddr}, 切り出し後: ${addr}`);
+
+        // STEP 2: 特定の市区町村名を修正する
+        const cityAdjustments = {
+            "大町": "大町市",
+            "市貝": "市貝町",
+            "田村": "田村市",
+            "市川": "市川市",
+            "町田": "町田市",
+            "市原": "市原市"
+        };
+
+        if (cityAdjustments[addr]) {
+            console.log(`修正前: ${addr}`);
+            addr = cityAdjustments[addr];
+            console.log(`修正後: ${addr}`);
         }
 
+        // STEP 3: pointsByScaleに追加
+        pointsByScale[scale] = pointsByScale[scale] || {};
+        pointsByScale[scale][prefecture] = pointsByScale[scale][prefecture] || [];
+        pointsByScale[scale][prefecture].push(addr);
+    });
+
+    return pointsByScale;
+}
         function getTsunamiInfo(domesticTsunami) {
             const tsunamiMessages = {
                 "None": "この地震による津波の心配はありません。",
