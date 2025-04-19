@@ -75,6 +75,7 @@
         <button id="subscribeButton">通知を許可</button>
         <button id="testNotificationButton">テスト通知</button>
         <button class="scroll-button" onclick="scrollToEewSection()">緊急地震速報へ</button>
+      <button id="reloadButton">再読み込み🔃</button>
     </header>
     <main>
         <div id="earthquakeInfo">地震情報を取得中...</div>
@@ -82,6 +83,7 @@
     </main>
 
     <script>
+      
         const publicVapidKey = 'BC1T1-o4f9vLJ11ngQXOZTdKY8xd38vUyWeWyPosJ7JDJxnCPrAGtJZE_CUW4dqdh60eEUf5G-qzWjaojsSMer0';
 
         async function subscribe() {
@@ -130,6 +132,9 @@
         document.getElementById('testNotificationButton').addEventListener('click', () => {
             sendTestNotification().catch(err => console.error(err));
         });
+      document.getElementById('reloadButton').addEventListener('click', () => {
+    location.reload();
+});
 
         function urlBase64ToUint8Array(base64String) {
             const padding = '='.repeat((4 - base64String.length % 4) % 4);
