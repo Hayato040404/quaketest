@@ -10,7 +10,7 @@ const wsUrl = 'wss://api.p2pquake.net/v2/ws';
 const eewWsUrl = 'wss://ws-api.wolfx.jp/jma_eew';
 
 // WebSocket 再接続の間隔（ミリ秒）
-const reconnectInterval = 5000;
+const reconnectInterval = 1000;
 
 // 環境変数 PORT からポートを取得（Render の要件）
 const PORT = process.env.PORT || 3000;
