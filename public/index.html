@@ -71,7 +71,7 @@
 <body>
     <header>
         <h1>地震情報アプリ</h1>
-        <p>プログラムの修正を行いました</p>
+        <p>6/2のバグ修正など。</p>
         <button id="subscribeButton">通知を許可</button>
         <button id="testNotificationButton">テスト通知</button>
         <button class="scroll-button" onclick="scrollToEewSection()">緊急地震速報へ</button>
@@ -250,8 +250,7 @@
                 const eewInfo = document.createElement('div');
                 eewInfo.innerHTML = `
                     <p>${formattedMessage.replace(/\n/g, '<br>')}</p>
-                    //<textarea id="eewComment" placeholder="自作緊急地震速報文"></textarea>
-                    //<button onclick="shareEewComment()">自作情報文を共有</button>
+                    
                     <textarea id="editedEewMessage" placeholder="通知メッセージを編集" style="width: 100%; height: 150px;">${formattedMessage}</textarea>
                     <button onclick="shareEditedEewMessage()">編集したメッセージを共有</button>
                 `;
