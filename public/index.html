@@ -74,6 +74,54 @@
             padding: 0;
         }
 
+        .admin-message {
+            margin: 16px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+            position: relative;
+            display: none;
+        }
+
+        .admin-message.info {
+            background-color: rgba(0, 122, 255, 0.1);
+            border-left: 4px solid var(--system-blue);
+            color: var(--system-blue);
+        }
+
+        .admin-message.warning {
+            background-color: rgba(255, 149, 0, 0.1);
+            border-left: 4px solid var(--system-orange);
+            color: var(--system-orange);
+        }
+
+        .admin-message.error {
+            background-color: rgba(255, 59, 48, 0.1);
+            border-left: 4px solid var(--system-red);
+            color: var(--system-red);
+        }
+
+        .admin-message.show {
+            display: block;
+        }
+
+        .admin-message-close {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: inherit;
+            opacity: 0.7;
+        }
+
+        .admin-message-close:hover {
+            opacity: 1;
+        }
+
         .header {
             position: sticky;
             top: 0;
@@ -527,6 +575,30 @@
             margin-top: 40px;
         }
 
+        /* 管理者メニューボタン用のスタイル */
+        .admin-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background-color: var(--card-background);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            z-index: 100;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .admin-button:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
         /* Ensure proper contrast in both modes */
         @media (prefers-color-scheme: light) {
             .copy-toast {
@@ -545,6 +617,12 @@
 </head>
 <body>
     <div class="container">
+        <!-- 管理者メッセージ表示エリア -->
+        <div id="adminMessage" class="admin-message">
+            <button class="admin-message-close" onclick="hideAdminMessage()">×</button>
+            <div id="adminMessageText"></div>
+        </div>
+
         <div class="header">
             <h1 class="app-title">地震情報</h1>
             <p class="app-subtitle">6/2のバグ修正など。</p>
@@ -623,10 +701,42 @@
         </div>
     </div>
 
+    <!-- 管理者メニューへのリンク -->
+    <a href="/admin" class="admin-button" title="管理者メニュー">⚙️</a>
+
     <script>
         const publicVapidKey = 'BC1T1-o4f9vLJ11ngQXOZTdKY8xd38vUyWeWyPosJ7JDJxnCPrAGtJZE_CUW4dqdh60eEUf5G-qzWjaojsSMer0';
         let earthquakeData = [];
         let eewData = null;
+
+        // 管理者メッセージを取得して表示する関数
+        async function fetchAdminMessage() {
+            try {
+                const response = await fetch('/api/admin-message');
+                const data = await response.json();
+                
+                if (data.isVisible && data.text) {
+                    showAdminMessage(data.text, data.type || 'info');
+                }
+            } catch (error) {
+                console.error('管理者メッセージの取得に失敗しました:', error);
+            }
+        }
+
+        // 管理者メッセージを表示する関数
+        function showAdminMessage(text, type = 'info') {
+            const messageElement = document.getElementById('adminMessage');
+            const textElement = document.getElementById('adminMessageText');
+            
+            textElement.textContent = text;
+            messageElement.className = `admin-message ${type} show`;
+        }
+
+        // 管理者メッセージを非表示にする関数
+        function hideAdminMessage() {
+            const messageElement = document.getElementById('adminMessage');
+            messageElement.classList.remove('show');
+        }
 
         async function subscribe() {
             if ('serviceWorker' in navigator) {
@@ -1047,6 +1157,7 @@
                 "None": "この地震による津波の心配はありません。",
                 "Unknown": "不明",
                 "Checking": "津波の有無を調査中です。今後の情報に注意してください。",
+                
                 "NonEffective": "若干の海面変動があるかもしれませんが、被害の心配はありません。",
                 "Watch": "現在、津波注意報を発表中です。",
                 "Warning": "津波警報等（大津波警報・津波警報あるいは津波注意報）を発表中です。"
@@ -1135,6 +1246,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             fetchEarthquakeInfo();
             fetchEewInfo();
+            fetchAdminMessage(); // 管理者メッセージを取得
         });
     </script>
 </body>
