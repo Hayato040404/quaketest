@@ -48,15 +48,12 @@ server.listen(PORT, () => {
   console.log(`HTTP server is running on port ${PORT}`);
 });
 
-// 管理者キー
-const ADMIN_KEY = '0429';
-
 // 管理者メッセージを設定するAPI
 app.post('/api/admin-message', (req, res) => {
   const adminKey = req.query.key;
   
   // 簡易的な認証
-  if (adminKey !== ADMIN_KEY) {
+  if (adminKey !== '0429') {
     return res.status(401).json({ error: '認証に失敗しました' });
   }
   
@@ -87,7 +84,7 @@ app.get('/api/admin-message', (req, res) => {
 app.get('/api/admin-message-full', (req, res) => {
   const adminKey = req.query.key;
   
-  if (adminKey !== ADMIN_KEY) {
+  if (adminKey !== 'earthquake-admin-key') {
     return res.status(401).json({ error: '認証に失敗しました' });
   }
   
