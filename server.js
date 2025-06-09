@@ -84,7 +84,7 @@ app.get('/api/admin-message', (req, res) => {
 app.get('/api/admin-message-full', (req, res) => {
   const adminKey = req.query.key;
   
-  if (adminKey !== 'earthquake-admin-key') {
+  if (adminKey !== '0429') {
     return res.status(401).json({ error: '認証に失敗しました' });
   }
   
